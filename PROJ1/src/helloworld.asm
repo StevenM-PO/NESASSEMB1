@@ -18,39 +18,34 @@
 
 .export main
 .proc main
-
-forever:
   LDX PPUSTATUS
   LDX #$3F
   STX PPUADDR
   LDX #$00
   STX PPUADDR
-  LDA #$11
+load_palettes:
+  LDA palettes,X
   STA PPUDATA
-  LDA #$1A
-  STA PPUDATA
-  LDA #$0A
-  STA PPUDATA
-  LDA #$10
-  STA PPUDATA
-  LDA #$70
-  STA $0200
-  LDA #$07
-  STA $0201
-  LDA #$00
-  STA $0202
-  LDA #$80
-  STA $0203
-
+  INX
+  CPX #$10
+  BNE load_palettes
+  LDX #$00
+load_sprites:
+  LDA sprites,X
+  STA $0200,X
+  INX
+  CPX #$10
+  BNE load_sprites
 vblankwait:
   BIT PPUSTATUS
   BPL vblankwait
-
   LDA #%10010000
   STA PPUCTRL
   LDA #%00111110
   STA PPUMASK
-  jmp forever
+
+forever:
+  JMP forever
 .endproc
 
 .segment "VECTORS"
@@ -58,3 +53,15 @@ vblankwait:
 
 .segment "CHR"
 .incbin "graphics.chr"
+
+.segment "RODATA"
+palettes:
+.byte $23, $19, $09, $0f
+.byte $23, $01, $05, $35
+.byte $23, $01, $05, $35
+.byte $23, $01, $05, $35
+sprites:
+.byte $60, $05, $02, $80
+.byte $60, $06, $03, $88
+.byte $68, $07, $01, $80
+.byte $68, $08, $00, $88
