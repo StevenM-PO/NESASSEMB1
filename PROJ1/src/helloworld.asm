@@ -73,69 +73,63 @@ strt_noPress:
   JSR readNextInput
   BEQ up_noPress
   LDX #$00
+  LDY #$04
 up_press:
-  LDA $0200,X
-  SEC
-  SBC #$02
-  STA $0200,X
-  CPX #$0C
-  CLC
-  TXA
-  ADC #$04
-  TAX
-  BNE up_press
+  JSR negMov
 up_noPress:
   JSR readNextInput
   BEQ dwn_noPress
   LDX #$00
+  LDY #$04
 dwn_press:
-  LDA $0200,X
-  CLC
-  ADC #$02
-  STA $0200,X
-  CPX #$0C
-  CLC
-  TXA
-  ADC #$04
-  TAX
-  BNE dwn_press
+  JSR posMov
 dwn_noPress:
   JSR readNextInput
   BEQ lft_noPress
+  LDX #$03
+  LDY #$04
 lft_press:
-  LDA $0203,X
-  SEC
-  SBC #$02
-  STA $0203,X
-  CPX #$0F
-  CLC
-  TXA
-  ADC #$04
-  TAX
-  BNE lft_press
+  JSR negMov
 lft_noPress:
   JSR readNextInput
   BEQ rgt_noPress
-  LDX #$00
+  LDX #$03
+  LDY #$04
 rgt_press:
-  LDA $0203,X
-  CLC
-  ADC #$02
-  STA $0203,X
-  CPX #$0F
-  CLC
-  TXA
-  ADC #$04
-  TAX
-  BNE rgt_press
+  JSR posMov
 rgt_noPress:
 
 endcontroller:
   JMP vblankwait
 
+;Sprite movement subroutines
 readNextInput:
   LDA $4016
   AND #%00000001
+  RTS
+posMov:
+  LDA $0200,X
+  CLC
+  ADC #$01
+  STA $0200,X
+  JSR countY4
+  BNE posMov
+  RTS
+negMov:
+  LDA $0200,X
+  SEC
+  SBC #$01
+  STA $0200,X
+  JSR countY4
+  BNE negMov
+  RTS
+countY4:
+  CLC
+  TXA
+  ADC #$04
+  TAX
+  DEY
+  CPY #$00
   RTS
 .endproc
 
