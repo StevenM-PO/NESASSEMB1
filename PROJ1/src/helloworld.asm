@@ -23,12 +23,20 @@
   STX PPUADDR
   LDX #$00
   STX PPUADDR
+  LDX #$00
 load_palettes:
   LDA palettes,X
   STA PPUDATA
   INX
   CPX #$10
   BNE load_palettes
+  LDX #$00
+load_spritePalettes:
+  LDA palettes,x
+  STA PPUDATA
+  INX
+  CPX #$10
+  BNE load_spritePalettes
   LDX #$00
 load_sprites:
   LDA sprites,X
@@ -45,7 +53,29 @@ vblankwait:
   STA PPUMASK
 
 forever:
-  JMP forever
+LatchController:
+  LDA #$01
+  STA $4016
+  LDA #$00
+  STA $4016
+  LDA $4016
+  AND #%00000001
+  BEQ a_press
+endcontroller:
+  LDX $0200
+  INX
+  STX $0200
+  LDX $0204
+  INX
+  STX $0204
+  LDX $0208
+  INX
+  STX $0208
+  LDX $020C
+  INX
+  STX $020C
+a_press:
+  JMP vblankwait
 .endproc
 
 .segment "VECTORS"
@@ -56,12 +86,12 @@ forever:
 
 .segment "RODATA"
 palettes:
-.byte $23, $19, $09, $0f
+.byte $11, $19, $09, $0f
 .byte $23, $01, $05, $35
 .byte $23, $01, $05, $35
 .byte $23, $01, $05, $35
 sprites:
-.byte $60, $05, $02, $80
-.byte $60, $06, $03, $88
-.byte $68, $07, $01, $80
-.byte $68, $08, $00, $88
+.byte $60, $05, $01, $80
+.byte $60, $06, $01, $88
+.byte $68, $07, $02, $80
+.byte $68, $08, $03, $88
