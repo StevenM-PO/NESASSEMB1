@@ -102,7 +102,7 @@ rgt_noPress:
 endcontroller:
   JMP vblankwait
 
-;Sprite movement subroutines
+;Sprite movement subroutines.
 readNextInput:
   LDA $4016
   AND #%00000001
