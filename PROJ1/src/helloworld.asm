@@ -58,24 +58,79 @@ LatchController:
   STA $4016
   LDA #$00
   STA $4016
+  JSR readNextInput
+  BEQ a_noPress
+a_noPress:
+  JSR readNextInput
+  BEQ b_noPress
+b_noPress:
+  JSR readNextInput
+  BEQ sel_noPress
+sel_noPress:
+  JSR readNextInput
+  BEQ strt_noPress
+strt_noPress:
+  JSR readNextInput
+  BEQ up_noPress
+  LDX #$00
+  LDY #$04
+up_press:
+  JSR negMov
+up_noPress:
+  JSR readNextInput
+  BEQ dwn_noPress
+  LDX #$00
+  LDY #$04
+dwn_press:
+  JSR posMov
+dwn_noPress:
+  JSR readNextInput
+  BEQ lft_noPress
+  LDX #$03
+  LDY #$04
+lft_press:
+  JSR negMov
+lft_noPress:
+  JSR readNextInput
+  BEQ rgt_noPress
+  LDX #$03
+  LDY #$04
+rgt_press:
+  JSR posMov
+rgt_noPress:
+
+endcontroller:
+  JMP vblankwait
+
+;Sprite movement subroutines.
+readNextInput:
   LDA $4016
   AND #%00000001
-  BEQ a_press
-endcontroller:
-  LDX $0200
-  INX
-  STX $0200
-  LDX $0204
-  INX
-  STX $0204
-  LDX $0208
-  INX
-  STX $0208
-  LDX $020C
-  INX
-  STX $020C
-a_press:
-  JMP vblankwait
+  RTS
+posMov:
+  LDA $0200,X
+  CLC
+  ADC #$01
+  STA $0200,X
+  JSR countY4
+  BNE posMov
+  RTS
+negMov:
+  LDA $0200,X
+  SEC
+  SBC #$01
+  STA $0200,X
+  JSR countY4
+  BNE negMov
+  RTS
+countY4:
+  CLC
+  TXA
+  ADC #$04
+  TAX
+  DEY
+  CPY #$00
+  RTS
 .endproc
 
 .segment "VECTORS"
