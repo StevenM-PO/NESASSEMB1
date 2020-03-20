@@ -1,6 +1,10 @@
 .include "constants.inc"
 .include "header.inc"
 
+.segment "ZEROPAGE"
+bulletAge: .res 1
+aReleased: .res 1
+
 .segment "CODE"
 .proc irq_handler
   RTI
@@ -44,6 +48,9 @@ load_sprites:
   INX
   CPX #$10
   BNE load_sprites
+
+  LDX #$00
+  STX bulletAge
 vblankwait:
   BIT PPUSTATUS
   BPL vblankwait
@@ -52,7 +59,6 @@ vblankwait:
   LDA #%00111110
   STA PPUMASK
 
-forever:
 LatchController:
   LDA #$01
   STA $4016
@@ -60,6 +66,7 @@ LatchController:
   STA $4016
   JSR readNextInput
   BEQ a_noPress
+  JSR bulletShoot
 a_noPress:
   JSR readNextInput
   BEQ b_noPress
@@ -100,6 +107,12 @@ rgt_press:
 rgt_noPress:
 
 endcontroller:
+
+;bulletMovement
+  LDX bulletAge
+  CPX #$00
+  BEQ vblankwait
+  JSR moveBullet
   JMP vblankwait
 
 ;Sprite movement subroutines.
@@ -131,6 +144,58 @@ countY4:
   DEY
   CPY #$00
   RTS
+
+;bullet subroutines
+bulletShoot:
+  LDX bulletAge
+  CPX #$00
+  BEQ createBullet
+  RTS
+createBullet:
+  LDX $0204
+  STX $0210
+  LDA $0207
+  SEC
+  SBC #$04
+  STA $0213
+  LDX #$09
+  STX $0211
+  LDX #$01
+  STX $0212
+  LDX bulletAge
+  INX
+  STX bulletAge
+  RTS
+moveBullet:
+  LDA $0210
+  SEC
+  SBC #$05
+  STA $0210
+  ;LDX $0213
+  ;INX
+  ;STX $0213
+  LDX bulletAge
+  INX
+  CPX #$20
+  STX bulletAge
+  BEQ clearBullet
+  LDX #$05
+EoSDetect:
+  CPX $0210
+  BEQ clearBullet
+  DEX
+  CPX #$0
+  BNE EoSDetect
+  RTS
+clearBullet:
+  LDX #$00
+  STX $0210
+  STX $0211
+  STX $0212
+  STX $0213
+  STX bulletAge
+  RTS
+
 .endproc
 
 .segment "VECTORS"
