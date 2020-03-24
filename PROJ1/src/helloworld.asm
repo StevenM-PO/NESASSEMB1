@@ -4,6 +4,7 @@
 .segment "ZEROPAGE"
 bulletAge: .res 1
 aReleased: .res 1
+numOfBul:  .res 1
 
 .segment "CODE"
 .proc irq_handler
@@ -108,7 +109,7 @@ rgt_noPress:
 
 endcontroller:
 
-;bulletMovement
+;bulletMovement Calls
   LDX bulletAge
   CPX #$00
   BEQ vblankwait
